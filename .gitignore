@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node / Dashboard
+node_modules/
+dashboard/dist/
+dashboard/.vite/
+*.tsbuildinfo
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+config/thresholds.yaml
+config/devices.yaml
+config/local.yaml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# IDE & OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Firmware build artifacts
+firmware/**/build/
+firmware/**/.pio/
+firmware/**/cmake-build-*/
+
+# Logs & runtime
+logs/
+*.log
+
+# Docker volumes
+docker/volumes/

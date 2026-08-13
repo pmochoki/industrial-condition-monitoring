@@ -1,0 +1,42 @@
+# Machine health thresholds — copy to thresholds.yaml and tune per machine.
+# Values below are illustrative defaults for a ~1200 RPM motor/pump demo.
+# Units: vibration in g (1 g ≈ 9.81 m/s²), temperature in °C.
+
+device_id: machine-001
+
+baseline:
+  # Reference values during known-good operation (manual or auto-calibrated)
+  vibration_rms_g: 0.05
+  vibration_peak_g: 0.15
+  crest_factor: 3.0
+  dominant_frequency_hz: 20.0   # Expected 1× shaft frequency at 1200 RPM
+  temperature_c: 45.0
+
+thresholds:
+  vibration_rms_g:
+    warning: 0.12
+    critical: 0.25
+  vibration_peak_g:
+    warning: 0.35
+    critical: 0.70
+  crest_factor:
+    warning: 5.0
+    critical: 8.0
+  dominant_frequency_hz:
+    # Deviation from expected shaft frequency (± Hz)
+    warning_deviation: 5.0
+    critical_deviation: 15.0
+  temperature_c:
+    warning: 65.0
+    critical: 80.0
+
+statistical:
+  # Z-score deviation from rolling baseline (after warm-up period)
+  z_score_warning: 2.0
+  z_score_critical: 3.5
+  rolling_window_samples: 120
+
+composite_score:
+  # Combined anomaly score thresholds (0.0–1.0)
+  warning: 0.45
+  critical: 0.75

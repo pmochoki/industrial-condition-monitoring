@@ -1,0 +1,83 @@
+# Default system configuration
+# Override per-environment via config/local.yaml (gitignored) or environment variables.
+
+app:
+  name: industrial-condition-monitoring
+  environment: development
+  log_level: INFO
+
+device:
+  id: machine-001
+  name: "Demo Rotating Machine"
+  type: motor_pump  # motor_pump | fan | compressor | generic_rotating
+
+sampling:
+  # 2048 Hz: captures fundamentals up to ~1024 Hz (Nyquist).
+  # At 1200 RPM (20 Hz shaft speed), provides ~50 samples per revolution.
+  # Suitable for low-to-medium speed machinery in a portfolio/demo context.
+  # NOT sufficient for high-speed spindles or detailed bearing envelope analysis.
+  sample_rate_hz: 2048
+  window_size_samples: 1024  # 0.5 s window at 2048 Hz — power-of-2 for FFT
+  overlap_ratio: 0.5
+  temperature_interval_s: 1.0
+
+signal_processing:
+  filter:
+    enabled: true
+    type: butterworth_bandpass
+    low_cutoff_hz: 2.0      # Remove DC drift and very low-frequency building vibration
+    high_cutoff_hz: 1000.0  # Below Nyquist; limits high-frequency noise amplification
+    order: 4
+  features:
+    - mean
+    - rms
+    - peak
+    - peak_to_peak
+    - std_dev
+    - crest_factor
+    - dominant_frequency
+
+anomaly_detection:
+  # Explainable threshold-based detection (Phase 4).
+  # Baselines are learned from a configurable warm-up period or set manually.
+  baseline_warmup_windows: 60
+  status_levels:
+    normal: 0
+    warning: 1
+    critical: 2
+  # Feature weights for composite anomaly score (0.0–1.0 each)
+  feature_weights:
+    vibration_rms: 0.30
+    vibration_peak: 0.20
+    crest_factor: 0.15
+    dominant_frequency: 0.15
+    temperature: 0.20
+  # Thresholds loaded from thresholds.yaml — not hardcoded here.
+
+mqtt:
+  broker_host: localhost
+  broker_port: 1883
+  use_tls: false
+  qos: 1
+  retain_status: true
+  topic_prefix: machines
+  # Resolved topics: {topic_prefix}/{device_id}/telemetry|status|alerts
+
+backend:
+  host: 0.0.0.0
+  port: 8000
+  database_url: sqlite:///./data/telemetry.db
+  telemetry_retention_days: 30
+  max_batch_insert: 100
+
+dashboard:
+  refresh_interval_ms: 1000
+  history_default_range_hours: 24
+  max_points_per_chart: 500
+
+simulator:
+  # Phase 2 — fault scenario control
+  default_condition: normal
+  shaft_speed_rpm: 1200
+  noise_floor_g: 0.002
+  seed: 42  # Reproducible synthetic data

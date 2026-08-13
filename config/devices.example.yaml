@@ -1,0 +1,19 @@
+# Multi-device registry — copy to devices.yaml for local deployment.
+# Used by backend and dashboard to track connected nodes.
+
+devices:
+  - id: machine-001
+    name: "Demo Motor-Pump Unit"
+    type: motor_pump
+    location: "Plant Floor — Line A"
+    shaft_speed_rpm: 1200
+    enabled: true
+    thresholds_file: thresholds.yaml
+
+  - id: machine-002
+    name: "Simulated Fan Unit"
+    type: fan
+    location: "HVAC — Roof Unit (simulated)"
+    shaft_speed_rpm: 900
+    enabled: false
+    thresholds_file: thresholds.yaml
