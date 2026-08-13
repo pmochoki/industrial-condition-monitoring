@@ -249,7 +249,7 @@ Full discussion: [Limitations](docs/limitations.md)
 
 **Peter Mochoki** — Embedded systems, mechatronics, and industrial automation portfolio project.
 
-LinkedIn project post: *(link to be added)*
+LinkedIn project post: [Predictive Maintenance & Condition Monitoring Node](https://lnkd.in/p/dp6w967a)
 
 ---
 
