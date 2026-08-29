@@ -178,9 +178,9 @@ industrial-condition-monitoring/
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Architecture, docs, config structure | **Current** |
-| 2 | Machine simulator | Planned |
-| 3 | Signal processing modules + tests | Planned |
+| 1 | Architecture, docs, config structure | **Complete** |
+| 2 | Machine simulator | **Current — implementation added** |
+| 3 | Signal processing modules + tests | Next |
 | 4 | Fault detection | Planned |
 | 5 | MQTT publishing | Planned |
 | 6 | Backend + database | Planned |
@@ -193,19 +193,31 @@ Full roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ---
 
-## Setup (Phase 1 — Documentation Only)
+## Setup (Phase 2 — Machine Simulator)
 
-Implementation begins in Phase 2. When ready:
+The simulator requires Python 3.11+:
 
 ```bash
 git clone https://github.com/pmochoki/industrial-condition-monitoring.git
 cd industrial-condition-monitoring
-cp .env.example .env
-cp config/thresholds.example.yaml config/thresholds.yaml
-cp config/devices.example.yaml config/devices.yaml
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
 ```
 
-Detailed installation instructions will be added as each phase is completed.
+Generate reproducible CSV samples:
+
+```bash
+python -m simulator --condition imbalance --severity 0.5 --output sample.csv
+```
+
+Run the simulator behavior tests:
+
+```bash
+python -m pytest -q
+```
+
+The implementation status and next milestone are tracked in [docs/roadmap.md](docs/roadmap.md).
 
 ---
 
