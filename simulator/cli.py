@@ -6,7 +6,6 @@ import argparse
 import csv
 import json
 import sys
-from dataclasses import asdict
 from typing import TextIO
 
 from simulator.conditions import CONDITIONS
