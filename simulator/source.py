@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Protocol
 
 from simulator.models.machine import Machine, MachineConfig, RawSampleWindow
@@ -22,11 +21,7 @@ class MachineDataSource(Protocol):
     def sample_rate_hz(self) -> int: ...
 
 
-class SimulatedMachine(Machine):
-    """Named adapter for callers that depend on the source abstraction."""
+# The simulator is already a concrete implementation of the source contract.
+SimulatedMachine = Machine
 
-    def __init__(self, *args: object, **kwargs: object) -> None:
-        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
-
-
-__all__ = ["MachineDataSource", "RawSampleWindow", "SimulatedMachine", "MachineConfig", "datetime"]
+__all__ = ["MachineDataSource", "RawSampleWindow", "SimulatedMachine", "MachineConfig"]
