@@ -179,7 +179,7 @@ industrial-condition-monitoring/
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 1 | Architecture, docs, config structure | **Complete** |
-| 2 | Machine simulator | **Current — implementation added** |
+| 2 | Machine simulator | **Complete** |
 | 3 | Signal processing modules + tests | Next |
 | 4 | Fault detection | Planned |
 | 5 | MQTT publishing | Planned |
