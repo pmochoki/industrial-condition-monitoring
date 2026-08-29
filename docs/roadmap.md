@@ -11,7 +11,7 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 | Phase | Name | Deliverable | Status |
 |-------|------|-------------|--------|
 | 1 | Architecture | Docs, config, directory structure | **Complete** |
-| 2 | Machine Simulator | Physics-informed signal generator | Planned |
+| 2 | Machine Simulator | Physics-informed signal generator | **Implementation added; verification pending** |
 | 3 | Signal Processing | Filter, features, FFT + unit tests | Planned |
 | 4 | Fault Detection | Threshold scorer + simulator tests | Planned |
 | 5 | MQTT | Telemetry publisher + Mosquitto setup | Planned |
@@ -62,6 +62,8 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 - Each fault type produces distinguishable feature changes
 
 **Exit criteria:** Simulator produces plottable signals that visually and statistically differ by fault type.
+
+**Implementation status:** The package, fault models, seeded noise, CLI, and behavioral tests are committed. Run `python -m pytest -q` locally to verify the exit criteria; this environment does not include Python.
 
 ---
 
@@ -209,6 +211,4 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 
 ## Current Status
 
-**Phase 1 is complete.** Ready to begin Phase 2 — Machine Simulator.
-
-Say **"Begin Phase 2"** to proceed.
+**Phase 1 is complete.** Phase 2 implementation is added, with local test execution still pending. The next planned milestone is Phase 3 — Signal Processing.
