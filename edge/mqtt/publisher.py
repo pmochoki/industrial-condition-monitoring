@@ -8,7 +8,7 @@ import os
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -32,7 +32,7 @@ class MqttSettings:
     keepalive_s: int = 60
 
     @classmethod
-    def load(cls, path: str | Path = "config/default.yaml") -> "MqttSettings":
+    def load(cls, path: str | Path = "config/default.yaml") -> MqttSettings:
         """Load broker defaults from YAML and apply MQTT_* environment overrides."""
         config = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
         section = config.get("mqtt", {}) if isinstance(config, dict) else {}
@@ -43,10 +43,16 @@ class MqttSettings:
         if bool(username) != bool(password):
             raise ValueError("MQTT_USERNAME and MQTT_PASSWORD must be set together")
         settings = cls(
-            broker_host=os.getenv("MQTT_BROKER_HOST", str(section.get("broker_host", "localhost"))),
-            broker_port=int(os.getenv("MQTT_BROKER_PORT", section.get("broker_port", 1883))),
+            broker_host=os.getenv(
+                "MQTT_BROKER_HOST", str(section.get("broker_host", "localhost"))
+            ),
+            broker_port=int(
+                os.getenv("MQTT_BROKER_PORT", section.get("broker_port", 1883))
+            ),
             client_id=os.getenv("MQTT_CLIENT_ID", "condition-monitor-001"),
-            topic_prefix=os.getenv("MQTT_TOPIC_PREFIX", str(section.get("topic_prefix", "machines"))),
+            topic_prefix=os.getenv(
+                "MQTT_TOPIC_PREFIX", str(section.get("topic_prefix", "machines"))
+            ),
             qos=int(section.get("qos", 1)),
             retain_status=bool(section.get("retain_status", True)),
             use_tls=_env_bool("MQTT_USE_TLS", bool(section.get("use_tls", False))),
@@ -64,8 +70,12 @@ class MqttSettings:
             raise ValueError("MQTT broker port must be between 1 and 65535")
         if self.qos != 1:
             raise ValueError("this telemetry contract requires MQTT QoS 1")
-        if not self.topic_prefix.strip() or any(char in self.topic_prefix for char in "+#"):
-            raise ValueError("MQTT topic prefix must be non-empty and cannot contain wildcards")
+        if not self.topic_prefix.strip() or any(
+            char in self.topic_prefix for char in "+#"
+        ):
+            raise ValueError(
+                "MQTT topic prefix must be non-empty and cannot contain wildcards"
+            )
         if self.keepalive_s <= 0:
             raise ValueError("MQTT keepalive must be positive")
 
@@ -78,10 +88,12 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 def _timestamp(value: datetime | None = None) -> str:
-    stamp = value or datetime.now(timezone.utc)
+    stamp = value or datetime.now(UTC)
     if stamp.tzinfo is None:
-        stamp = stamp.replace(tzinfo=timezone.utc)
-    return stamp.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        stamp = stamp.replace(tzinfo=UTC)
+    return (
+        stamp.astimezone(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+    )
 
 
 class MqttPublisher:
@@ -110,14 +122,23 @@ class MqttPublisher:
             raise ValueError("sample_rate_hz must be positive")
         self.device_id = device_id
         self.sample_rate_hz = sample_rate_hz
-        will = {"device_id": device_id, "timestamp": _timestamp(), "online": False, "errors": []}
+        will = {
+            "device_id": device_id,
+            "timestamp": _timestamp(),
+            "online": False,
+            "errors": [],
+        }
         status_topic = self._topic(device_id, "status")
         self.client.will_set(status_topic, json.dumps(will), qos=1, retain=True)
         if self.settings.username:
             self.client.username_pw_set(self.settings.username, self.settings.password)
         if self.settings.use_tls:
             self.client.tls_set()
-        result = self.client.connect(self.settings.broker_host, self.settings.broker_port, self.settings.keepalive_s)
+        result = self.client.connect(
+            self.settings.broker_host,
+            self.settings.broker_port,
+            self.settings.keepalive_s,
+        )
         if result not in (None, mqtt.MQTT_ERR_SUCCESS):
             raise ConnectionError(f"MQTT connect returned error code {result}")
         self.client.loop_start()
@@ -129,7 +150,9 @@ class MqttPublisher:
     def publish_status(self, online: bool) -> None:
         """Publish retained status for dashboard last-known state."""
         device_id = self._require_device()
-        uptime = max(0, int(time.monotonic() - self._started_at)) if self._started_at else 0
+        uptime = (
+            max(0, int(time.monotonic() - self._started_at)) if self._started_at else 0
+        )
         payload = {
             "device_id": device_id,
             "timestamp": _timestamp(),
@@ -141,7 +164,11 @@ class MqttPublisher:
             "wifi_rssi": None,
             "errors": [],
         }
-        self._publish(self._topic(device_id, "status"), payload, retain=self.settings.retain_status)
+        self._publish(
+            self._topic(device_id, "status"),
+            payload,
+            retain=self.settings.retain_status,
+        )
         self._last_heartbeat = time.monotonic()
 
     def publish_telemetry(
@@ -161,7 +188,10 @@ class MqttPublisher:
             raise ValueError("source must be 'simulator' or 'hardware'")
         if anomaly.status not in {"NORMAL", "WARNING", "CRITICAL"}:
             raise ValueError("unsupported machine status")
-        if not math.isfinite(anomaly.anomaly_score) or not 0.0 <= anomaly.anomaly_score <= 1.0:
+        if (
+            not math.isfinite(anomaly.anomaly_score)
+            or not 0.0 <= anomaly.anomaly_score <= 1.0
+        ):
             raise ValueError("anomaly_score must be finite and between 0.0 and 1.0")
 
         payload = {
