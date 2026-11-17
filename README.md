@@ -180,8 +180,8 @@ industrial-condition-monitoring/
 |-------|-------|--------|
 | 1 | Architecture, docs, config structure | **Complete** |
 | 2 | Machine simulator | **Complete** |
-| 3 | Signal processing modules + tests | Next |
-| 4 | Fault detection | Planned |
+| 3 | Signal processing modules + tests | **Complete** |
+| 4 | Fault detection | **Next** |
 | 5 | MQTT publishing | Planned |
 | 6 | Backend + database | Planned |
 | 7 | Dashboard | Planned |
@@ -193,9 +193,9 @@ Full roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ---
 
-## Setup (Phase 2 — Machine Simulator)
+## Setup (Phase 3 — Signal Processing)
 
-The simulator requires Python 3.11+:
+The simulator and edge-processing pipeline require Python 3.11+:
 
 ```bash
 git clone https://github.com/pmochoki/industrial-condition-monitoring.git
@@ -205,19 +205,19 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-Generate reproducible CSV samples:
+Generate reproducible CSV samples from the simulator:
 
 ```bash
 python -m simulator --condition imbalance --severity 0.5 --output sample.csv
 ```
 
-Run the simulator behavior tests:
+Run the complete test suite (simulator + signal processing):
 
 ```bash
 python -m pytest -q
 ```
 
-The implementation status and next milestone are tracked in [docs/roadmap.md](docs/roadmap.md).
+The edge pipeline is available as SignalProcessingPipeline().process(window), returning a FeatureVector with vibration RMS, peak, crest factor, and dominant frequency. Phase 3 is complete; the next milestone is Phase 4 — Fault Detection. See [docs/roadmap.md](docs/roadmap.md).
 
 ---
 
