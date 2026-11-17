@@ -6,26 +6,35 @@ import argparse
 import time
 from dataclasses import replace
 
-from simulator import CONDITIONS, Machine, MachineConfig
-
 from edge.anomaly.config import ThresholdConfig
 from edge.anomaly.scorer import ThresholdScorer
 from edge.mqtt.publisher import MqttPublisher, MqttSettings
 from edge.pipeline import SignalProcessingPipeline
+from simulator import CONDITIONS, Machine, MachineConfig
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Publish simulated condition-monitoring telemetry to MQTT.")
-    parser.add_argument("--condition", choices=[item.value for item in CONDITIONS], default="normal")
+    parser = argparse.ArgumentParser(
+        description="Publish simulated condition-monitoring telemetry to MQTT."
+    )
+    parser.add_argument(
+        "--condition", choices=[item.value for item in CONDITIONS], default="normal"
+    )
     parser.add_argument("--severity", type=float, default=0.0)
-    parser.add_argument("--windows", type=int, default=10, help="number of telemetry windows to publish")
+    parser.add_argument(
+        "--windows", type=int, default=10, help="number of telemetry windows to publish"
+    )
     parser.add_argument("--samples", type=int, default=1024, help="samples per window")
-    parser.add_argument("--interval-s", type=float, default=1.0, help="delay between publishes")
+    parser.add_argument(
+        "--interval-s", type=float, default=1.0, help="delay between publishes"
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device-id", default="machine-001")
     parser.add_argument("--broker-host")
     parser.add_argument("--broker-port", type=int)
-    parser.add_argument("--thresholds", help="threshold YAML path (defaults to local file or example)")
+    parser.add_argument(
+        "--thresholds", help="threshold YAML path (defaults to local file or example)"
+    )
     return parser
 
 
@@ -34,7 +43,9 @@ def main(argv: list[str] | None = None) -> int:
     if not 0.0 <= args.severity <= 1.0:
         raise SystemExit("--severity must be between 0.0 and 1.0")
     if args.windows <= 0 or args.samples <= 0 or args.interval_s < 0:
-        raise SystemExit("--windows and --samples must be positive; --interval-s cannot be negative")
+        raise SystemExit(
+            "--windows and --samples must be positive; --interval-s cannot be negative"
+        )
 
     settings = MqttSettings.load()
     settings = replace(
@@ -56,8 +67,13 @@ def main(argv: list[str] | None = None) -> int:
         for sequence in range(1, args.windows + 1):
             features = pipeline.process(machine.read_window(args.samples))
             anomaly = scorer.score(features)
-            publisher.publish_telemetry(features, anomaly, sequence=sequence, source="simulator")
-            print(f"sequence={sequence} status={anomaly.status} score={anomaly.anomaly_score:.3f} {anomaly.explanation}")
+            publisher.publish_telemetry(
+                features, anomaly, sequence=sequence, source="simulator"
+            )
+            print(
+                f"sequence={sequence} status={anomaly.status} "
+                f"score={anomaly.anomaly_score:.3f} {anomaly.explanation}"
+            )
             if sequence < args.windows and args.interval_s:
                 time.sleep(args.interval_s)
     finally:
