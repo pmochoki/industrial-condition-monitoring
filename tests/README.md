@@ -2,26 +2,15 @@
 
 Unit and integration tests for all project phases.
 
-**Status:** Test implementation begins in Phase 3.
+**Status:** Phase 2 simulator and Phase 3 signal-processing tests are implemented; all 14 currently pass.
 
-## Planned Structure
+## Current tests
 
-```
-tests/
-├── unit/
-│   ├── test_filtering.py       # Phase 3
-│   ├── test_features.py        # Phase 3
-│   ├── test_anomaly.py         # Phase 4
-│   └── test_simulator.py       # Phase 2
-├── integration/
-│   ├── test_mqtt_pipeline.py   # Phase 5
-│   └── test_backend_api.py     # Phase 6
-└── e2e/
-    └── test_full_pipeline.py   # Phase 9
-```
+- tests/test_simulator.py — deterministic output, fault behavior, temperature drift, and CLI output
+- tests/test_signal_processing.py — resultant signals, time-domain features, FFT, filter response, DC removal, and pipeline integration
 
-Run tests (when implemented):
+Run from the repository root:
 
-```bash
-pytest
-```
+    python -m pytest -q
+
+See [docs/roadmap.md](../docs/roadmap.md) for upcoming integration and end-to-end tests.
