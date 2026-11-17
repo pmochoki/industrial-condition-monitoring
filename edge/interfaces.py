@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Protocol
+from typing import Literal, Protocol
 
 
 class RawSampleWindowLike(Protocol):
@@ -35,3 +35,19 @@ class FeatureVector:
     vibration_std: float
     crest_factor: float
     dominant_frequency_hz: float
+
+
+@dataclass(frozen=True)
+class AnomalyResult:
+    """Explainable machine-health classification."""
+
+    status: Literal["NORMAL", "WARNING", "CRITICAL"]
+    anomaly_score: float
+    triggered_rules: list[str]
+    explanation: str
+
+
+class AnomalyScorer(Protocol):
+    """Pluggable scoring contract for threshold or future ML implementations."""
+
+    def score(self, features: FeatureVector) -> AnomalyResult: ...
