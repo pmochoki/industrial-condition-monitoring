@@ -92,8 +92,8 @@ def test_scorer_emits_z_score_rule_after_warmup(config: ThresholdConfig) -> None
 
 def test_composite_score_is_bounded(config: ThresholdConfig) -> None:
     scorer = CompositeScorer(config)
-    normal = {"vibration_rms_g": 0.05, "vibration_peak_g": 0.15, "crest_factor": 3.0, "dominant_frequency_hz": 40.0, "temperature_c": 45.0}
-    severe = {**normal, "vibration_rms_g": 1.0, "vibration_peak_g": 2.0, "crest_factor": 10.0, "temperature_c": 100.0}
+    normal = {"vibration_rms_g": 0.05, "vibration_peak_g": 0.15, "crest_factor": 3.0, "dominant_frequency_hz": 20.0, "temperature_c": 45.0}
+    severe = {**normal, "vibration_rms_g": 1.0, "vibration_peak_g": 2.0, "crest_factor": 10.0, "dominant_frequency_hz": 40.0, "temperature_c": 100.0}
 
     assert scorer.score(normal) == pytest.approx(0.0)
     assert scorer.score(severe) == pytest.approx(1.0)
