@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -12,8 +12,7 @@ from edge.interfaces import FeatureVector
 from edge.pipeline import SignalProcessingPipeline
 from simulator import Machine, MachineCondition, MachineConfig
 
-
-START = datetime(2026, 1, 1, tzinfo=timezone.utc)
+START = datetime(2026, 1, 1, tzinfo=UTC)
 
 
 def make_features(**changes: float) -> FeatureVector:
@@ -64,11 +63,16 @@ def test_absolute_critical_takes_precedence(config: ThresholdConfig) -> None:
     assert any("vibration_rms_g > critical" in rule for rule in result.triggered_rules)
 
 
-def test_dominant_frequency_uses_deviation_from_machine_baseline(config: ThresholdConfig) -> None:
+def test_dominant_frequency_uses_deviation_from_machine_baseline(
+    config: ThresholdConfig,
+) -> None:
     result = ThresholdScorer(config).score(make_features(dominant_frequency_hz=27.0))
 
     assert result.status == "WARNING"
-    assert any("dominant_frequency_hz deviation > warning" in rule for rule in result.triggered_rules)
+    assert any(
+        "dominant_frequency_hz deviation > warning" in rule
+        for rule in result.triggered_rules
+    )
 
 
 def test_baseline_warms_up_and_detects_outlier(config: ThresholdConfig) -> None:
@@ -87,19 +91,37 @@ def test_scorer_emits_z_score_rule_after_warmup(config: ThresholdConfig) -> None
 
     result = scorer.score(make_features(temperature_c=50.0))
     assert result.status == "CRITICAL"
-    assert any(rule.startswith("z_score_temperature > critical") for rule in result.triggered_rules)
+    assert any(
+        rule.startswith("z_score_temperature > critical")
+        for rule in result.triggered_rules
+    )
 
 
 def test_composite_score_is_bounded(config: ThresholdConfig) -> None:
     scorer = CompositeScorer(config)
-    normal = {"vibration_rms_g": 0.05, "vibration_peak_g": 0.15, "crest_factor": 3.0, "dominant_frequency_hz": 20.0, "temperature_c": 45.0}
-    severe = {**normal, "vibration_rms_g": 1.0, "vibration_peak_g": 2.0, "crest_factor": 10.0, "dominant_frequency_hz": 40.0, "temperature_c": 100.0}
+    normal = {
+        "vibration_rms_g": 0.05,
+        "vibration_peak_g": 0.15,
+        "crest_factor": 3.0,
+        "dominant_frequency_hz": 20.0,
+        "temperature_c": 45.0,
+    }
+    severe = {
+        **normal,
+        "vibration_rms_g": 1.0,
+        "vibration_peak_g": 2.0,
+        "crest_factor": 10.0,
+        "dominant_frequency_hz": 40.0,
+        "temperature_c": 100.0,
+    }
 
     assert scorer.score(normal) == pytest.approx(0.0)
     assert scorer.score(severe) == pytest.approx(1.0)
 
 
-def test_simulated_excessive_vibration_triggers_warning_or_critical(config: ThresholdConfig) -> None:
+def test_simulated_excessive_vibration_triggers_warning_or_critical(
+    config: ThresholdConfig,
+) -> None:
     machine = Machine(
         MachineCondition.EXCESSIVE_VIBRATION,
         severity=1.0,
