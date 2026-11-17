@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import math
 from collections import deque
+from collections.abc import Mapping
 from statistics import fmean, pstdev
-from typing import Mapping
 
 
 class BaselineTracker:
     """Track rolling normal-operation samples and expose z-scores."""
 
-    def __init__(self, feature_keys: tuple[str, ...], warmup_windows: int, window_size: int) -> None:
+    def __init__(
+        self, feature_keys: tuple[str, ...], warmup_windows: int, window_size: int
+    ) -> None:
         if warmup_windows <= 0 or window_size <= 0:
             raise ValueError("warmup_windows and window_size must be positive")
         self.warmup_windows = warmup_windows
