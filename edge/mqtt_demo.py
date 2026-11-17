@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import time
 from dataclasses import replace
 
@@ -26,7 +27,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--samples", type=int, default=1024, help="samples per window")
     parser.add_argument(
-        "--interval-s", type=float, default=1.0, help="delay between publishes"
+        "--interval-s",
+        type=float,
+        default=float(os.getenv("MQTT_TELEMETRY_INTERVAL_S", "1.0")),
+        help="delay between publishes",
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device-id", default="machine-001")
