@@ -1,25 +1,16 @@
 # Edge Signal Processing & Anomaly Detection
 
-Reference implementation of edge processing modules. Validated in Python, then ported to ESP32 firmware.
+Python reference implementation of the edge processing modules, designed to be portable to ESP32 firmware.
 
-**Status:** Not yet implemented — begins in Phase 3 (signal processing) and Phase 4 (anomaly detection).
+**Status:** Phase 3 signal processing is complete. Phase 4 anomaly detection is next.
 
-## Planned Structure
+## Phase 3 implemented
 
-```
-edge/
-├── interfaces.py           # MachineDataSource, FeatureVector, AnomalyScorer
-├── sampling/               # Buffer management, windowing
-├── filtering/              # Butterworth bandpass, detrend
-├── features/
-│   ├── time_domain.py      # RMS, peak, crest factor
-│   └── frequency_domain.py # FFT, dominant frequency
-├── anomaly/
-│   ├── thresholds.py       # Absolute limit checking
-│   ├── baseline.py         # Rolling baseline, z-score
-│   └── scorer.py           # Composite score, status classification
-├── mqtt/                   # Telemetry publisher (Phase 5)
-└── pipeline.py             # Full processing orchestrator
-```
+- Configurable 4th-order Butterworth bandpass filter and DC-offset removal
+- Resultant 3-axis acceleration and time-domain features: mean, RMS, peak, peak-to-peak, standard deviation, and crest factor
+- Hanning-windowed FFT and dominant-frequency extraction
+- SignalProcessingPipeline maps a raw sample window to a FeatureVector while preserving device, timestamp, and temperature metadata
 
-See [docs/signal-processing.md](../docs/signal-processing.md) and [docs/fault-detection.md](../docs/fault-detection.md).
+Run the full suite with: python -m pytest -q. The current suite has 14 passing tests across simulator and signal-processing behavior.
+
+See [docs/signal-processing.md](../docs/signal-processing.md) for design details and [docs/roadmap.md](../docs/roadmap.md) for the next phases.
