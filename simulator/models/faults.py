@@ -31,11 +31,15 @@ def profile_for(condition: MachineCondition, severity: float) -> FaultProfile:
         raise ValueError("severity must be between 0.0 and 1.0")
 
     if condition is MachineCondition.EXCESSIVE_VIBRATION:
-        return FaultProfile(vibration_1x_g=0.120 * severity, noise_multiplier=1.0 + 4.0 * severity)
+        return FaultProfile(
+            vibration_1x_g=0.120 * severity, noise_multiplier=1.0 + 4.0 * severity
+        )
     if condition is MachineCondition.IMBALANCE:
         return FaultProfile(vibration_1x_g=0.085 * severity)
     if condition is MachineCondition.MISALIGNMENT:
-        return FaultProfile(vibration_2x_g=0.060 * severity, vibration_3x_g=0.030 * severity)
+        return FaultProfile(
+            vibration_2x_g=0.060 * severity, vibration_3x_g=0.030 * severity
+        )
     if condition is MachineCondition.BEARING_DEGRADATION:
         return FaultProfile(
             bearing_harmonic_g=0.035 * severity,
@@ -45,7 +49,9 @@ def profile_for(condition: MachineCondition, severity: float) -> FaultProfile:
     if condition is MachineCondition.TEMPERATURE_INCREASE:
         return FaultProfile(temperature_rise_c_per_second=12.0 * severity)
     if condition is MachineCondition.SUDDEN_EVENTS:
-        return FaultProfile(impulse_amplitude_g=0.350 * severity, impulse_interval_s=0.75)
+        return FaultProfile(
+            impulse_amplitude_g=0.350 * severity, impulse_interval_s=0.75
+        )
     if condition is MachineCondition.SENSOR_NOISE:
         return FaultProfile(noise_multiplier=1.0 + 20.0 * severity)
     return FaultProfile()
