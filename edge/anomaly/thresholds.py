@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import Mapping
 
 from edge.anomaly.config import ThresholdConfig
 from edge.interfaces import FeatureVector
@@ -41,31 +41,60 @@ class ThresholdChecker:
 
     def evaluate(self, values: Mapping[str, float]) -> list[TriggeredRule]:
         rules: list[TriggeredRule] = []
-        for name in ("vibration_rms_g", "vibration_peak_g", "crest_factor", "temperature_c"):
+        for name in (
+            "vibration_rms_g",
+            "vibration_peak_g",
+            "crest_factor",
+            "temperature_c",
+        ):
             value = values[name]
             limits = self.config.thresholds[name]
-            severity = Severity.CRITICAL if value > limits["critical"] else (
-                Severity.WARNING if value > limits["warning"] else Severity.NORMAL
+            severity = (
+                Severity.CRITICAL
+                if value > limits["critical"]
+                else (
+                    Severity.WARNING if value > limits["warning"] else Severity.NORMAL
+                )
             )
             if severity is not Severity.NORMAL:
                 level = severity.name.lower()
-                rules.append(TriggeredRule(name, severity, f"{name} > {level} ({value:.3f} > {limits[level]:.3f})"))
+                rules.append(
+                    TriggeredRule(
+                        name,
+                        severity,
+                        f"{name} > {level} ({value:.3f} > {limits[level]:.3f})",
+                    )
+                )
 
         name = "dominant_frequency_hz"
         value = values[name]
         deviation = abs(value - self.config.baseline[name])
         limits = self.config.thresholds[name]
-        severity = Severity.CRITICAL if deviation > limits["critical_deviation"] else (
-            Severity.WARNING if deviation > limits["warning_deviation"] else Severity.NORMAL
+        severity = (
+            Severity.CRITICAL
+            if deviation > limits["critical_deviation"]
+            else (
+                Severity.WARNING
+                if deviation > limits["warning_deviation"]
+                else Severity.NORMAL
+            )
         )
         if severity is not Severity.NORMAL:
             level = severity.name.lower()
             limit = limits[f"{level}_deviation"]
-            rules.append(TriggeredRule(name, severity, f"{name} deviation > {level} ({deviation:.3f} > {limit:.3f} Hz)"))
+            rules.append(
+                TriggeredRule(
+                    name,
+                    severity,
+                    f"{name} deviation > {level} ({deviation:.3f} > {limit:.3f} Hz)",
+                )
+            )
         return rules
 
 
-def normalized_deviations(values: Mapping[str, float], config: ThresholdConfig) -> dict[str, float]:
+def normalized_deviations(
+    values: Mapping[str, float], config: ThresholdConfig
+) -> dict[str, float]:
     """Map configured feature deviations to 0–1 for the composite score."""
     names = {
         "vibration_rms": "vibration_rms_g",
