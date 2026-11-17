@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -57,7 +57,7 @@ class FakeClient:
 
 def features(status_time: datetime | None = None) -> FeatureVector:
     return FeatureVector(
-        timestamp=status_time or datetime(2026, 1, 1, tzinfo=timezone.utc),
+        timestamp=status_time or datetime(2026, 1, 1, tzinfo=UTC),
         device_id="machine-001",
         temperature_c=45.0,
         vibration_x=0.01,
@@ -74,7 +74,12 @@ def features(status_time: datetime | None = None) -> FeatureVector:
 
 def anomaly(status: str, score: float = 0.1) -> AnomalyResult:
     rules = [] if status == "NORMAL" else ["vibration_rms_g > warning"]
-    return AnomalyResult(status, score, rules, "All features normal." if not rules else "Vibration RMS exceeded warning.")  # type: ignore[arg-type]
+    return AnomalyResult(
+        status,
+        score,
+        rules,
+        "All features normal." if not rules else "Vibration RMS exceeded warning.",
+    )  # type: ignore[arg-type]
 
 
 def setup_publisher() -> tuple[MqttPublisher, FakeClient]:
@@ -120,7 +125,9 @@ def test_alerts_are_published_only_on_status_transitions() -> None:
     publisher.publish_telemetry(features(), anomaly("WARNING", 0.6), sequence=3)
     publisher.publish_telemetry(features(), anomaly("NORMAL"), sequence=4)
 
-    alerts = [item for item in client.published if item[0] == "machines/machine-001/alerts"]
+    alerts = [
+        item for item in client.published if item[0] == "machines/machine-001/alerts"
+    ]
     assert len(alerts) == 2
     assert alerts[0][1]["previous_status"] == "NORMAL"
     assert alerts[0][1]["current_status"] == "WARNING"
