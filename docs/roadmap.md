@@ -12,8 +12,8 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 |-------|------|-------------|--------|
 | 1 | Architecture | Docs, config, directory structure | **Complete** |
 | 2 | Machine Simulator | Physics-informed signal generator | **Complete** |
-| 3 | Signal Processing | Filter, features, FFT + unit tests | Planned |
-| 4 | Fault Detection | Threshold scorer + simulator tests | Planned |
+| 3 | Signal Processing | Filter, features, FFT + unit tests | **Complete** |
+| 4 | Fault Detection | Threshold scorer + simulator tests | **Next** |
 | 5 | MQTT | Telemetry publisher + Mosquitto setup | Planned |
 | 6 | Backend | MQTT subscriber, API, SQLite storage | Planned |
 | 7 | Dashboard | Live industrial monitoring UI | Planned |
@@ -80,6 +80,8 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 - Unit tests with known inputs (sine waves, impulses, DC offset)
 
 **Exit criteria:** All unit tests pass; features match hand-calculated expected values within tolerance.
+
+**Implementation status:** Complete. Filtering, time-domain features, FFT, and the processing pipeline are implemented; all 14 Phase 2 and 3 tests pass.
 
 ---
 
@@ -211,4 +213,4 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 
 ## Current Status
 
-**Phases 1 and 2 are complete.** The next planned milestone is Phase 3 — Signal Processing.
+**Phases 1–3 are complete.** The next planned milestone is Phase 4 — Fault Detection.
