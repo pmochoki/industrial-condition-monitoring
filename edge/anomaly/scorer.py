@@ -24,7 +24,14 @@ class CompositeScorer:
         deviations = normalized_deviations(values, self.config)
         weights = self.config.feature_weights
         total_weight = sum(weights.values())
-        return min(1.0, max(0.0, sum(weights.get(name, 0.0) * deviations[name] for name in deviations) / total_weight))
+        return min(
+            1.0,
+            max(
+                0.0,
+                sum(weights.get(name, 0.0) * deviations[name] for name in deviations)
+                / total_weight,
+            ),
+        )
 
 
 class StatusClassifier:
@@ -70,8 +77,14 @@ class ThresholdScorer:
         rules = self.checker.evaluate(values)
         for key, z_score in self.baseline.z_scores(values).items():
             magnitude = abs(z_score)
-            severity = Severity.CRITICAL if magnitude > self.config.z_score_critical else (
-                Severity.WARNING if magnitude > self.config.z_score_warning else Severity.NORMAL
+            severity = (
+                Severity.CRITICAL
+                if magnitude > self.config.z_score_critical
+                else (
+                    Severity.WARNING
+                    if magnitude > self.config.z_score_warning
+                    else Severity.NORMAL
+                )
             )
             if severity is not Severity.NORMAL:
                 display_name = {
@@ -80,15 +93,22 @@ class ThresholdScorer:
                     "dominant_frequency_hz": "dominant_frequency",
                     "temperature_c": "temperature",
                 }.get(key, key)
-                rules.append(TriggeredRule(
-                    f"z_score_{display_name}", severity,
-                    f"z_score_{display_name} > {severity.name.lower()} ({magnitude:.2f})",
-                ))
+                rules.append(
+                    TriggeredRule(
+                        f"z_score_{display_name}",
+                        severity,
+                        f"z_score_{display_name} > {severity.name.lower()} ({magnitude:.2f})",
+                    )
+                )
 
         score = self.composite.score(values)
         status = self.classifier.classify(score, rules)
         triggered = [rule.message for rule in rules]
-        explanation = "; ".join(triggered) if triggered else "All evaluated features are within configured limits."
+        explanation = (
+            "; ".join(triggered)
+            if triggered
+            else "All evaluated features are within configured limits."
+        )
         result = AnomalyResult(status, score, triggered, explanation)  # type: ignore[arg-type]
         if status == "NORMAL":
             self.baseline.observe(values)
