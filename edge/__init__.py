@@ -9,7 +9,12 @@ from edge.features import (
     dominant_frequency_hz,
     magnitude_spectrum,
 )
-from edge.interfaces import AnomalyResult, AnomalyScorer, FeatureVector, RawSampleWindowLike
+from edge.interfaces import (
+    AnomalyResult,
+    AnomalyScorer,
+    FeatureVector,
+    RawSampleWindowLike,
+)
 from edge.pipeline import ProcessingConfig, SignalProcessingPipeline
 
 __all__ = [
