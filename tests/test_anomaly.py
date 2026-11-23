@@ -133,3 +133,52 @@ def test_simulated_excessive_vibration_triggers_warning_or_critical(
 
     assert result.status in {"WARNING", "CRITICAL"}
     assert result.triggered_rules
+
+
+@pytest.mark.parametrize(
+    "condition",
+    (
+        MachineCondition.EXCESSIVE_VIBRATION,
+        MachineCondition.IMBALANCE,
+        MachineCondition.MISALIGNMENT,
+        MachineCondition.BEARING_DEGRADATION,
+        MachineCondition.SUDDEN_EVENTS,
+        MachineCondition.SENSOR_NOISE,
+    ),
+)
+def test_each_simulated_vibration_fault_triggers_warning(
+    config: ThresholdConfig, condition: MachineCondition
+) -> None:
+    machine = Machine(
+        condition,
+        severity=1.0,
+        config=MachineConfig(start_time=START),
+        seed=42,
+    )
+    features = SignalProcessingPipeline().process(machine.read_window(1024))
+
+    result = ThresholdScorer(config).score(features)
+
+    assert result.status == "WARNING"
+    assert result.triggered_rules
+
+
+def test_simulated_temperature_rise_transitions_from_warning_to_critical(
+    config: ThresholdConfig,
+) -> None:
+    machine = Machine(
+        MachineCondition.TEMPERATURE_INCREASE,
+        severity=1.0,
+        config=MachineConfig(start_time=START),
+        seed=42,
+    )
+    scorer = ThresholdScorer(config)
+    statuses = [
+        scorer.score(
+            SignalProcessingPipeline().process(machine.read_window(1024))
+        ).status
+        for _ in range(12)
+    ]
+
+    assert "WARNING" in statuses
+    assert "CRITICAL" in statuses
