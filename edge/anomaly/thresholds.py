@@ -33,6 +33,11 @@ def feature_values(features: FeatureVector) -> dict[str, float]:
     }
 
 
+def frequency_is_supported(value: float, expected: float) -> bool:
+    """Keep transient and broadband-noise peaks out of shaft-harmonic scoring."""
+    return expected * 0.5 <= value <= expected * 4.0
+
+
 class ThresholdChecker:
     """Evaluate the configured absolute limits for one feature vector."""
 
@@ -68,6 +73,8 @@ class ThresholdChecker:
 
         name = "dominant_frequency_hz"
         value = values[name]
+        if not frequency_is_supported(value, self.config.baseline[name]):
+            return rules
         deviation = abs(value - self.config.baseline[name])
         limits = self.config.thresholds[name]
         severity = (
