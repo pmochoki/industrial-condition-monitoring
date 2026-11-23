@@ -35,10 +35,10 @@ def profile_for(condition: MachineCondition, severity: float) -> FaultProfile:
             vibration_1x_g=0.120 * severity, noise_multiplier=1.0 + 4.0 * severity
         )
     if condition is MachineCondition.IMBALANCE:
-        return FaultProfile(vibration_1x_g=0.085 * severity)
+        return FaultProfile(vibration_1x_g=0.100 * severity)
     if condition is MachineCondition.MISALIGNMENT:
         return FaultProfile(
-            vibration_2x_g=0.060 * severity, vibration_3x_g=0.030 * severity
+            vibration_2x_g=0.100 * severity, vibration_3x_g=0.050 * severity
         )
     if condition is MachineCondition.BEARING_DEGRADATION:
         return FaultProfile(
@@ -53,5 +53,5 @@ def profile_for(condition: MachineCondition, severity: float) -> FaultProfile:
             impulse_amplitude_g=0.350 * severity, impulse_interval_s=0.75
         )
     if condition is MachineCondition.SENSOR_NOISE:
-        return FaultProfile(noise_multiplier=1.0 + 20.0 * severity)
+        return FaultProfile(noise_multiplier=1.0 + 31.0 * severity)
     return FaultProfile()
