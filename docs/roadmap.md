@@ -13,9 +13,9 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 | 1 | Architecture | Docs, config, directory structure | **Complete** |
 | 2 | Machine Simulator | Physics-informed signal generator | **Complete** |
 | 3 | Signal Processing | Filter, features, FFT + unit tests | **Complete** |
-| 4 | Fault Detection | Threshold scorer + simulator tests | **Next** |
-| 5 | MQTT | Telemetry publisher + Mosquitto setup | Planned |
-| 6 | Backend | MQTT subscriber, API, SQLite storage | Planned |
+| 4 | Fault Detection | Threshold scorer + simulator tests | **Complete** |
+| 5 | MQTT | Telemetry publisher + Mosquitto setup | **Complete** |
+| 6 | Backend | MQTT subscriber, API, SQLite storage | **Next** |
 | 7 | Dashboard | Live industrial monitoring UI | Planned |
 | 8 | Firmware | ESP32 architecture + driver stubs | Planned |
 | 9 | Integration Testing | Full pipeline E2E tests | Planned |
@@ -97,6 +97,10 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 
 **Exit criteria:** Each simulated fault condition triggers the expected status level with documented triggered rules.
 
+**Implementation status:** Complete. The scorer combines configured limits, rolling z-scores, and a weighted composite score; extreme out-of-band peaks are excluded from shaft-harmonic scoring.
+
+**Verification:** All 34 tests pass, including warning/critical escalation for excessive vibration, warning-to-critical temperature escalation, and expected warnings for every other simulated fault.
+
 ---
 
 ## Phase 5 — MQTT
@@ -111,6 +115,8 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 - CLI demo: simulator → processing → MQTT → console subscriber
 
 **Exit criteria:** Messages visible in `mosquitto_sub -t 'machines/+/#' -v` with valid JSON matching schema.
+
+**Implementation status:** Complete. The publisher sends telemetry, retained online/offline status, transition alerts, and an offline Last Will. Local Mosquitto verification confirmed each message type and the retained offline status. See [MQTT Architecture](mqtt-architecture.md).
 
 ---
 
@@ -213,4 +219,4 @@ Each phase produces a testable artifact. Phases are sequential — do not skip a
 
 ## Current Status
 
-**Phases 1–3 are complete.** The next planned milestone is Phase 4 — Fault Detection.
+**Phases 1–5 are complete.** The next milestone is Phase 6 — Backend ingestion and storage.
