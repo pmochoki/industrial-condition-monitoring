@@ -32,7 +32,7 @@ def profile_for(condition: MachineCondition, severity: float) -> FaultProfile:
 
     if condition is MachineCondition.EXCESSIVE_VIBRATION:
         return FaultProfile(
-            vibration_1x_g=0.120 * severity, noise_multiplier=1.0 + 4.0 * severity
+            vibration_1x_g=0.220 * severity, noise_multiplier=1.0 + 4.0 * severity
         )
     if condition is MachineCondition.IMBALANCE:
         return FaultProfile(vibration_1x_g=0.100 * severity)
