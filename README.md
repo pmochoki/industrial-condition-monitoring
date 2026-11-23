@@ -181,9 +181,9 @@ industrial-condition-monitoring/
 | 1 | Architecture, docs, config structure | **Complete** |
 | 2 | Machine simulator | **Complete** |
 | 3 | Signal processing modules + tests | **Complete** |
-| 4 | Fault detection | **Next** |
-| 5 | MQTT publishing | Planned |
-| 6 | Backend + database | Planned |
+| 4 | Fault detection | **Complete** |
+| 5 | MQTT publishing | **Complete** |
+| 6 | Backend + database | **Next** |
 | 7 | Dashboard | Planned |
 | 8 | Firmware architecture | Planned |
 | 9 | End-to-end integration testing | Planned |
@@ -193,9 +193,9 @@ Full roadmap: [docs/roadmap.md](docs/roadmap.md)
 
 ---
 
-## Setup (Phase 3 — Signal Processing)
+## Setup (Phase 5 — Fault Detection + MQTT)
 
-The simulator and edge-processing pipeline require Python 3.11+:
+The simulator, edge scorer, and MQTT publisher require Python 3.11+:
 
 ```bash
 git clone https://github.com/pmochoki/industrial-condition-monitoring.git
@@ -205,31 +205,33 @@ source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
-Generate reproducible CSV samples from the simulator:
-
-```bash
-python -m simulator --condition imbalance --severity 0.5 --output sample.csv
-```
-
-Run the complete test suite (simulator + signal processing):
+The sample thresholds in `config/thresholds.example.yaml` are illustrative; tune them for the monitored machine. Run the full suite (34 tests):
 
 ```bash
 python -m pytest -q
 ```
 
-The edge pipeline is available as SignalProcessingPipeline().process(window), returning a FeatureVector with vibration RMS, peak, crest factor, and dominant frequency. Phase 3 is complete; the next milestone is Phase 4 — Fault Detection. See [docs/roadmap.md](docs/roadmap.md).
+To run the local MQTT demo, start Docker and `mosquitto_sub` in separate terminals:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
+
+```bash
+mosquitto_sub -h localhost -t 'machines/+/#' -v
+```
+
+```bash
+python -m edge.mqtt_demo --condition excessive_vibration --severity 0.5 --windows 10
+```
+
+Stop the local broker with `docker compose -f docker/docker-compose.yml down`. The publisher prints each classification while sending JSON telemetry and status-transition alerts.
 
 ---
 
-## Demonstration (Planned)
+## Demonstration
 
-The completed system will demonstrate:
-
-1. Simulated machine running under normal conditions
-2. Injection of fault scenarios (imbalance, misalignment, bearing degradation, overheating)
-3. Real-time telemetry via MQTT
-4. Live dashboard with historical trends
-5. Explainable alerts with feature-level reasoning
+The current edge-to-broker demo runs the simulator through signal processing, explainable fault scoring, and MQTT publishing. The live backend, database, and dashboard are the next planned phases (6–7).
 
 ---
 
