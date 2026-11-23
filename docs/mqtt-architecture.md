@@ -1,7 +1,7 @@
 # MQTT Architecture
 
 **Phase 1 — Design Specification**  
-*Implementation: Phase 5 (publisher), Phase 6 (subscriber)*
+*Implementation: Phase 5 publisher — complete; Phase 6 subscriber — next*
 
 ---
 
@@ -214,18 +214,29 @@ Edge Node                          Mosquitto                    Backend
 
 ---
 
-## 7. Local Development Setup (Phase 5+)
+## 7. Local Development Setup (Phase 5)
 
-Mosquitto will run via Docker Compose:
+The Compose service runs Mosquitto on localhost only. Install Docker Compose and the Mosquitto client tools first.
 
-```yaml
-# docker/docker-compose.yml (Phase 5 — placeholder)
-services:
-  mosquitto:
-    image: eclipse-mosquitto:2
-    ports:
-      - "1883:1883"
+Start the broker:
+
+```bash
+docker compose -f docker/docker-compose.yml up -d
 ```
+
+Subscribe to all device messages in a second terminal:
+
+```bash
+mosquitto_sub -h localhost -t 'machines/+/#' -v
+```
+
+Run the simulator → signal-processing → anomaly-scoring → MQTT demo in a third terminal:
+
+```bash
+python -m edge.mqtt_demo --condition excessive_vibration --severity 0.5 --windows 10
+```
+
+The subscriber receives telemetry, retained online/offline status, and an alert when machine status changes. Stop the broker with `docker compose -f docker/docker-compose.yml down`. The publisher has been smoke-tested against a local Mosquitto broker.
 
 ---
 
