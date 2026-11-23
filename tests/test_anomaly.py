@@ -119,26 +119,28 @@ def test_composite_score_is_bounded(config: ThresholdConfig) -> None:
     assert scorer.score(severe) == pytest.approx(1.0)
 
 
-def test_simulated_excessive_vibration_triggers_warning_or_critical(
-    config: ThresholdConfig,
+@pytest.mark.parametrize(
+    ("severity", "expected"), ((0.5, "WARNING"), (1.0, "CRITICAL"))
+)
+def test_excessive_vibration_severity_scales_status(
+    config: ThresholdConfig, severity: float, expected: str
 ) -> None:
     machine = Machine(
         MachineCondition.EXCESSIVE_VIBRATION,
-        severity=1.0,
+        severity=severity,
         config=MachineConfig(start_time=START),
         seed=11,
     )
     features = SignalProcessingPipeline().process(machine.read_window(1024))
     result = ThresholdScorer(config).score(features)
 
-    assert result.status in {"WARNING", "CRITICAL"}
+    assert result.status == expected
     assert result.triggered_rules
 
 
 @pytest.mark.parametrize(
     "condition",
     (
-        MachineCondition.EXCESSIVE_VIBRATION,
         MachineCondition.IMBALANCE,
         MachineCondition.MISALIGNMENT,
         MachineCondition.BEARING_DEGRADATION,
