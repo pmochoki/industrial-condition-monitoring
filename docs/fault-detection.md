@@ -1,7 +1,7 @@
 # Fault Detection & Anomaly Scoring
 
 **Phase 1 — Design Specification**  
-*Implementation: Phase 4*
+*Implementation: Phase 4 — complete*
 
 ---
 
@@ -37,6 +37,8 @@ elif vibration_rms > warning_threshold → WARNING
 ```
 
 Thresholds are **per machine** — not hardcoded in source code.
+
+Dominant-frequency scoring only uses peaks between 0.5× and 4× the configured expected frequency. Out-of-band transient or broadband-noise peaks are excluded from shaft-harmonic scoring; high-frequency bearing envelope analysis is outside this demo's scope.
 
 Reference: ISO 10816 provides velocity RMS zones for machine classes. This project uses acceleration RMS from MEMS sensors — thresholds are calibrated against the simulator's known-good baseline, not copied directly from ISO tables.
 
@@ -145,7 +147,7 @@ Expected detection behaviour when tested against the Phase 2 simulator:
 | Sudden vibration event | Transient peak and crest factor spike | WARNING (may self-clear) |
 | Sensor noise | Elevated std dev without structured harmonic change | WARNING (if excessive) |
 
-Automated tests in Phase 4 will verify these responses against configured thresholds.
+Phase 4 tests verify these responses against configured thresholds: excessive vibration escalates from WARNING to CRITICAL, temperature rises from WARNING to CRITICAL, and each remaining simulated fault produces a documented WARNING. The suite currently passes all 34 tests.
 
 ---
 
