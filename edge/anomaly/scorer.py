@@ -9,6 +9,7 @@ from edge.anomaly.thresholds import (
     ThresholdChecker,
     TriggeredRule,
     feature_values,
+    frequency_is_supported,
     normalized_deviations,
 )
 from edge.interfaces import AnomalyResult, FeatureVector
@@ -74,6 +75,11 @@ class ThresholdScorer:
 
     def score(self, features: FeatureVector) -> AnomalyResult:
         values = feature_values(features)
+        expected_frequency = self.config.baseline["dominant_frequency_hz"]
+        if not frequency_is_supported(
+            values["dominant_frequency_hz"], expected_frequency
+        ):
+            values["dominant_frequency_hz"] = expected_frequency
         rules = self.checker.evaluate(values)
         for key, z_score in self.baseline.z_scores(values).items():
             magnitude = abs(z_score)
@@ -102,6 +108,24 @@ class ThresholdScorer:
                 )
 
         score = self.composite.score(values)
+        if score >= self.config.composite_critical:
+            rules.append(
+                TriggeredRule(
+                    "composite_score",
+                    Severity.CRITICAL,
+                    f"composite_score > critical ({score:.3f} > "
+                    f"{self.config.composite_critical:.3f})",
+                )
+            )
+        elif score >= self.config.composite_warning:
+            rules.append(
+                TriggeredRule(
+                    "composite_score",
+                    Severity.WARNING,
+                    f"composite_score > warning ({score:.3f} > "
+                    f"{self.config.composite_warning:.3f})",
+                )
+            )
         status = self.classifier.classify(score, rules)
         triggered = [rule.message for rule in rules]
         explanation = (
