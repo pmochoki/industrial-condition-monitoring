@@ -1,16 +1,15 @@
-# Edge Signal Processing & Anomaly Detection
+# Edge Signal Processing, Fault Detection & MQTT
 
-Python reference implementation of the edge processing modules, designed to be portable to ESP32 firmware.
+Python reference implementation of the edge pipeline, designed to be portable to ESP32 firmware.
 
-**Status:** Phase 3 signal processing is complete. Phase 4 anomaly detection is next.
+**Status:** Phases 3, 4, and 5 are complete. The next planned work is Phase 6 — backend ingestion and storage.
 
-## Phase 3 implemented
+## Implemented
 
-- Configurable 4th-order Butterworth bandpass filter and DC-offset removal
-- Resultant 3-axis acceleration and time-domain features: mean, RMS, peak, peak-to-peak, standard deviation, and crest factor
-- Hanning-windowed FFT and dominant-frequency extraction
-- SignalProcessingPipeline maps a raw sample window to a FeatureVector while preserving device, timestamp, and temperature metadata
+- Signal processing: configurable Butterworth bandpass filtering, DC removal, resultant 3-axis vibration, time-domain features, and Hanning-windowed FFT.
+- Fault detection: YAML-configured absolute thresholds, rolling z-score baseline, weighted composite score, and explainable NORMAL/WARNING/CRITICAL results. Simulated fault cases verify expected warning and critical escalations.
+- MQTT: QoS 1 telemetry and transition alerts, retained online/offline status, Last Will, TLS/auth environment options, and local Mosquitto Compose setup.
 
-Run the full suite with: python -m pytest -q. The current suite has 14 passing tests across simulator and signal-processing behavior.
+Run the complete suite with `python -m pytest -q` (34 tests). For the local demo, start Mosquitto using `docker compose -f docker/docker-compose.yml up -d`, subscribe with `mosquitto_sub -h localhost -t 'machines/+/#' -v`, then run `python -m edge.mqtt_demo --condition excessive_vibration --severity 0.5 --windows 10`.
 
-See [docs/signal-processing.md](../docs/signal-processing.md) for design details and [docs/roadmap.md](../docs/roadmap.md) for the next phases.
+See [Fault Detection](../docs/fault-detection.md), [MQTT Architecture](../docs/mqtt-architecture.md), and [the roadmap](../docs/roadmap.md) for design and next steps.
