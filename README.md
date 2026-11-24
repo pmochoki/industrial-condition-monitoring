@@ -261,7 +261,7 @@ Full discussion: [Limitations](docs/limitations.md)
 
 ## Author
 
-**Peter Mochoki** — Embedded systems, mechatronics, and industrial automation portfolio project.
+**Paul Ochoki Mokoro** — Embedded systems, mechatronics, and industrial automation portfolio project.
 
 LinkedIn project post: [Predictive Maintenance & Condition Monitoring Node](https://lnkd.in/p/dp6w967a)
 
